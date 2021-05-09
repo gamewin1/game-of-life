@@ -11,8 +11,8 @@ local cellsTall = 25
 
 function love.load()
     math.randomseed(os.time())
-    setWindow(cellsWide,cellsTall)
-    myGrid = newGrid(cellsWide,cellsTall,15)
+    setWindowSize(cellsWide,cellsTall)
+    myGrid = getNewGrid(cellsWide,cellsTall,15)
 end
 function love.update(dt)
 
@@ -24,7 +24,7 @@ function love.draw()
 end
 
 ---Sets window size based on the grid size
-function setWindow(w,h)
+function setWindowSize(w, h)
     ---get total width or height window should be based on number of cells given
     function getDimensionSize(cellCount)
         local dimensionSize = ((cellCount+1)*cellBorderSize)+(cellCount*cellSize)
@@ -61,7 +61,7 @@ function drawBorders()
 end
 
 ---Returns a new grid table, and randomly fills based on percentage from 0-100
-function newGrid(w,h,percentFilled)
+function getNewGrid(w, h, percentFilled)
     local newGrid = {}
     for i = 1,w do
         newRow = {}
@@ -79,7 +79,7 @@ end
 
 ---Given boolean current state and number of neighbors,
 ---run against conway's game of life rules and returns if cell is alive or not
-function newState(currentState, numberOfNeighbors)
+function getNewState(currentState, numberOfNeighbors)
     if currentState then
         if numberOfNeighbors == 2 or numberOfNeighbors == 3 then
             return true
@@ -93,6 +93,32 @@ function newState(currentState, numberOfNeighbors)
             return false
         end
     end
+end
+
+---Get an index by looping back to other side if one end of the table is passed up
+function getRelativeIndex(table,index)
+    -- For example, say the 'table' passed has 4 items (expected to be all indexed from 1-4)
+    -- Here's what the return would look like with different 'index' values given
+    -- Index:  -2 -1  0  1  2  3  4  5  6  7  8  9
+    -- Return:  2  3  4  1  2  3  4  1  2  3  4  1
+    while index > #table or index < 1 do
+        if index > #table then
+            index = index-#table
+        elseif index < 1 then
+            index = index+#table
+        end
+    end
+    return index
+end
+
+---Get count of all surrounding live cells around a certain cell
+function getNeighbors(grid, x, y)
+
+end
+
+---Do update for a certain cell
+function getStateForCell(oldgrid, newgrid, x, y)
+
 end
 
 ---Passed a grid, render the cells in it
