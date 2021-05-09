@@ -10,6 +10,7 @@ local cellsTall = 25
 -- END CONFIG
 
 function love.load()
+    math.randomseed(os.time())
     setWindow(cellsWide,cellsTall)
 end
 function love.update(dt)
@@ -32,6 +33,7 @@ function setWindow(w,h)
 end
 
 function drawGrid()
+    if cellBorderSize == 0 then return end
     -- center of top left pixel is 0.5, 0.5
     love.graphics.setColor(borderColor)
     love.graphics.setLineWidth(cellBorderSize)
@@ -54,4 +56,21 @@ function drawGrid()
     for k,v in pairs(yCoords) do
         love.graphics.line(0.5, v, windowWidth+0.5, v)
     end
+end
+
+---Returns a new grid table, and randomly fills based on percentage from 0-100
+function newGrid(w,h,percentFilled)
+    newGrid = {}
+    for i = 1,w do
+        newRow = {}
+        for j = 1,h do
+            if percentFilled >= math.random(1,100) then
+                newRow[j] = true
+            else
+                newRow[j] = false
+            end
+        end
+        newGrid[i] = newRow
+    end
+    return newGrid
 end
