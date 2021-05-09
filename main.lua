@@ -3,8 +3,8 @@ local cellBorderSize = 2
 local cellSize = 30
 -- {red, green, blue, alpha}
 local borderColor = {0.2, 0.2, 0.2, 1}
-local aliveColor = {0.9, 1, 0.9, 1}
-local deadColor = {0.1, 0, 0, 1}
+local aliveColor = {0.8, 0.8, 0.8, 1}
+local deadColor = {0, 0, 0, 1}
 local cellsWide = 40
 local cellsTall = 25
 -- END CONFIG
@@ -12,13 +12,15 @@ local cellsTall = 25
 function love.load()
     math.randomseed(os.time())
     setWindow(cellsWide,cellsTall)
+    myGrid = newGrid(cellsWide,cellsTall,15)
 end
 function love.update(dt)
 
 end
 
 function love.draw()
-    drawGrid()
+    drawBorders()
+    drawCells(myGrid)
 end
 
 ---Sets window size based on the grid size
@@ -32,7 +34,7 @@ function setWindow(w,h)
     love.window.setMode(windowWidth, windowHeight)
 end
 
-function drawGrid()
+function drawBorders()
     if cellBorderSize == 0 then return end
     -- center of top left pixel is 0.5, 0.5
     love.graphics.setColor(borderColor)
@@ -89,6 +91,22 @@ function newState(currentState, numberOfNeighbors)
             return true
         else
             return false
+        end
+    end
+end
+
+---Passed a grid, render the cells in it
+function drawCells(grid)
+    for a, b in pairs(grid) do
+        local x = (cellBorderSize*a)+(cellSize*(a-1))
+        for c, d in pairs(b) do
+            local y = (cellBorderSize*c)+(cellSize*(c-1))
+            if d then
+                love.graphics.setColor(aliveColor)
+            else
+                love.graphics.setColor(deadColor)
+            end
+            love.graphics.rectangle("fill",x,y,cellSize,cellSize)
         end
     end
 end
