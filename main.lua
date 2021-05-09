@@ -8,11 +8,11 @@
 local borderColor = {0.2, 0.2, 0.2, 1}
 local aliveColor = {0.8, 0.8, 0.8, 1}
 local deadColor = {0, 0, 0, 1}
-local cellBorderSize = 2
-local cellSize = 30
-local cellsWide = 40
-local cellsTall = 25
-local secondsBetweenGenerations = 0.25
+local cellBorderSize = 1
+local cellSize = 10
+local cellsWide = 120
+local cellsTall = 60
+local secondsBetweenGenerations = 0.2
 -- ####################
 -- # ADVANCED OPTIONS #
 -- ####################
@@ -46,6 +46,11 @@ end
 function love.draw()
     drawBorders()
     drawCells(currentGrid)
+    --[[love.graphics.setColor(0,0,0,.5)
+    love.graphics.rectangle("fill",10.5,10.5,100,30)
+    love.graphics.setColor(1,1,1,1)
+    local winX, winY = love.graphics.getDimensions()
+    love.graphics.print(winX .. ", " .. winY,10.5,10.5)]]--
 end
 
 function love.update(dt)
