@@ -74,3 +74,21 @@ function newGrid(w,h,percentFilled)
     end
     return newGrid
 end
+
+---Given boolean current state and number of neighbors,
+---run against conway's game of life rules and returns if cell is alive or not
+function newState(currentState, numberOfNeighbors)
+    if currentState then
+        if numberOfNeighbors == 2 or numberOfNeighbors == 3 then
+            return true
+        else
+            return false
+        end
+    else
+        if numberOfNeighbors == 3 then
+            return true
+        else
+            return false
+        end
+    end
+end
