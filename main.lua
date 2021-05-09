@@ -79,7 +79,7 @@ end
 
 ---Given boolean current state and number of neighbors,
 ---run against conway's game of life rules and returns if cell is alive or not
-function getNewState(currentState, numberOfNeighbors)
+function calculateGOL(currentState, numberOfNeighbors)
     if currentState then  -- for living cells
         if numberOfNeighbors == 2 or numberOfNeighbors == 3 then  -- if there's 2-3 neighbors
             return true  -- cell survives
@@ -112,7 +112,7 @@ function getRelInd(table,index)
 end
 
 ---Get count of all surrounding live cells around a certain cell
-function getNeighbors(grid, x, y)
+function getNeighborCount(grid, x, y)
     local relativesToCheck = { {-1,-1}, {-1,0}, {-1,1}, {0,-1}, {0,1}, {1,-1}, {1,0}, {1,1} }
     local neighborCount = 0
     for a, b in pairs(relativesToCheck) do
@@ -124,8 +124,15 @@ function getNeighbors(grid, x, y)
 end
 
 ---Do update for a certain cell
-function getStateForCell(oldgrid, newgrid, x, y)
-
+function getStateForCell(oldGrid, x, y)
+    local neighbors = getNeighborCount(oldGrid,x,y)
+    if oldGrid[x][y] then
+        local alive = true
+    else
+        local alive = false
+    end
+    local newState = calculateGOL(alive,neighbors)
+    return newState
 end
 
 ---Passed a grid, render the cells in it
