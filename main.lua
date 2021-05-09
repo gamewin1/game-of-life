@@ -80,17 +80,17 @@ end
 ---Given boolean current state and number of neighbors,
 ---run against conway's game of life rules and returns if cell is alive or not
 function getNewState(currentState, numberOfNeighbors)
-    if currentState then
-        if numberOfNeighbors == 2 or numberOfNeighbors == 3 then
-            return true
-        else
-            return false
+    if currentState then  -- for living cells
+        if numberOfNeighbors == 2 or numberOfNeighbors == 3 then  -- if there's 2-3 neighbors
+            return true  -- cell survives
+        else  -- if there's too few or too many neighbors
+            return false  -- cell dies from under or overpopulation
         end
-    else
-        if numberOfNeighbors == 3 then
-            return true
-        else
-            return false
+    else  -- for dead cells
+        if numberOfNeighbors == 3 then  -- if there's 3 neighbors
+            return true  -- cell is born
+        else  -- if there isn't 3 neighbors
+            return false  -- cell remains dead
         end
     end
 end
