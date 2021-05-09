@@ -62,7 +62,7 @@ end
 
 ---Returns a new grid table, and randomly fills based on percentage from 0-100
 function newGrid(w,h,percentFilled)
-    newGrid = {}
+    local newGrid = {}
     for i = 1,w do
         newRow = {}
         for j = 1,h do
