@@ -95,8 +95,8 @@ function getNewState(currentState, numberOfNeighbors)
     end
 end
 
----Get an index by looping back to other side if one end of the table is passed up
-function getRelativeIndex(table,index)
+---Get Relative Index by looping back to other side if one end of the table is passed up
+function getRelInd(table,index)
     -- For example, say the 'table' passed has 4 items (expected to be all indexed from 1-4)
     -- Here's what the return would look like with different 'index' values given
     -- Index:  -2 -1  0  1  2  3  4  5  6  7  8  9
@@ -113,7 +113,14 @@ end
 
 ---Get count of all surrounding live cells around a certain cell
 function getNeighbors(grid, x, y)
-
+    local relativesToCheck = { {-1,-1}, {-1,0}, {-1,1}, {0,-1}, {0,1}, {1,-1}, {1,0}, {1,1} }
+    local neighborCount = 0
+    for a, b in pairs(relativesToCheck) do
+        if grid[getRelInd(grid,x+b[1])][getRelInd(grid[x],y+b[2])] then
+            neighborCount = neighborCount + 1
+        end
+    end
+    return neighborCount
 end
 
 ---Do update for a certain cell
