@@ -7,20 +7,58 @@ local aliveColor = {0.8, 0.8, 0.8, 1}
 local deadColor = {0, 0, 0, 1}
 local cellsWide = 40
 local cellsTall = 25
+-- ADVANCED OPTIONS
+-- this unintentionally tends to regulate the speed of the game
+local calculationsPerUpdate = 100
 -- END CONFIG
 
 function love.load()
     math.randomseed(os.time())
     setWindowSize(cellsWide,cellsTall)
-    myGrid = getNewGrid(cellsWide,cellsTall,15)
+    currentGrid = getNewGrid(cellsWide,cellsTall,10)
+    --[[-- glider
+    currentGrid[4][3] = true
+    currentGrid[5][4] = true
+    currentGrid[5][5] = true
+    currentGrid[3][5] = true
+    currentGrid[4][5] = true
+    -- block
+    currentGrid[10][2] = true
+    currentGrid[11][2] = true
+    currentGrid[10][3] = true
+    currentGrid[11][3] = true
+    -- blinker
+    currentGrid[2][10] = true
+    currentGrid[3][10] = true
+    currentGrid[4][10] = true]]--
 end
 function love.update(dt)
-
+    -- check for an in progress grid and make one if it doesnt exist
+    if not gridInProgress then  -- if we don't have an in progress grid, make one
+        gridInProgress = getNewGrid(cellsWide, cellsTall, 0)
+        cellsNeedingUpdate = {}
+        for a = 1, cellsWide do
+            for b = 1, cellsTall do
+                table.insert(cellsNeedingUpdate,{a,b})
+            end
+        end
+    end
+    -- do a few cell calculations
+    for a = 1, math.min(calculationsPerUpdate, #cellsNeedingUpdate) do
+        local cellToCheck = table.remove(cellsNeedingUpdate, #cellsNeedingUpdate)
+        local newState = getStateForCell(currentGrid, cellToCheck[1], cellToCheck[2])
+        gridInProgress[cellToCheck[1]][cellToCheck[2]] = newState
+    end
+    -- check if all calculations are done, and shift to new grid if they are
+    if #cellsNeedingUpdate == 0 then
+        currentGrid = gridInProgress
+        gridInProgress = nil
+    end
 end
 
 function love.draw()
     drawBorders()
-    drawCells(myGrid)
+    drawCells(currentGrid)
 end
 
 ---Sets window size based on the grid size
@@ -81,7 +119,7 @@ end
 ---run against conway's game of life rules and returns if cell is alive or not
 function calculateGOL(currentState, numberOfNeighbors)
     if currentState then  -- for living cells
-        if numberOfNeighbors == 2 or numberOfNeighbors == 3 then  -- if there's 2-3 neighbors
+        if numberOfNeighbors >= 2 and numberOfNeighbors <= 3 then  -- if there's 2-3 neighbors
             return true  -- cell survives
         else  -- if there's too few or too many neighbors
             return false  -- cell dies from under or overpopulation
@@ -126,10 +164,12 @@ end
 ---Do update for a certain cell
 function getStateForCell(oldGrid, x, y)
     local neighbors = getNeighborCount(oldGrid,x,y)
+    -- get current state of cell
+    local alive = nil
     if oldGrid[x][y] then
-        local alive = true
+        alive = true
     else
-        local alive = false
+        alive = false
     end
     local newState = calculateGOL(alive,neighbors)
     return newState
