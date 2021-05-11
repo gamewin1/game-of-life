@@ -20,7 +20,9 @@ local calculationsPerUpdate = -1  -- if less than 1, update whole board.
 -- ##############
 -- # END CONFIG #
 -- ##############
-
+if _CC_DEFAULT_SETTINGS then
+    love = {}
+end
 function love.load()
     math.randomseed(os.time())
     setWindowSize(cellsWide,cellsTall)
@@ -191,6 +193,26 @@ function drawCells(grid)
     end
 end
 
+function ccLoad()
+    math.randomseed(os.epoch())
+    currentGrid = getNewGrid(cellsWide,cellsTall,10)
+    secondsSinceLastGeneration = 0
+end
+
+---Passed a grid, render the cells in it
+function ccDraw(grid)
+    for x, b in pairs(grid) do
+        for y, d in pairs(b) do
+            term.setCursorPos(x,y)
+            if d then
+                term.write(string.char(127))
+            else
+                term.write(" ")
+            end
+        end
+    end
+end
+
 function drawBorders()
     if cellBorderSize == 0 then return end
     -- center of top left pixel is 0.5, 0.5
@@ -214,5 +236,32 @@ function drawBorders()
     end
     for k,v in pairs(yCoords) do
         love.graphics.line(0.5, v, windowWidth+0.5, v)
+    end
+end
+
+---This is main loop if run in computercraft
+function computercraft()
+    local dt = os.clock() - timeOfLastUpdate
+    timeOfLastUpdate = timeOfLastUpdate + dt
+    love.update(dt)
+    ccDraw(currentGrid)
+end
+
+-- run the computercraft version if we find this
+if _CC_DEFAULT_SETTINGS then
+    blankLine = ""
+    cellsWide, cellsTall = term.getSize()
+    for i = 1,cellsWide do
+        blankLine = blankLine .. " "
+    end
+    term.setPaletteColor(colors.black,deadColor[1],deadColor[2],deadColor[3])
+    term.setPaletteColor(colors.white,aliveColor[1],aliveColor[2],aliveColor[3])
+    ccLoad()
+    timeOfLastUpdate = os.clock()
+    while true do
+        computercraft()
+        -- yields
+        os.queueEvent("fakeEvent");
+        os.pullEvent("fakeEvent");
     end
 end
