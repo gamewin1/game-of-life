@@ -26,11 +26,11 @@ local generationsPerSecond = 8
 -- Whether to use a new seed every time.
 local randomSeed = true
 -- seed should be a number (can be integer or float). Ignored if randomSeed set to true.
-local seed = 0
+local seedToUse = 0
 
--- Whether to use the seed to determine a random fill percentage.
-local randomFill = true
--- fill percentage between 0-100. Ignored if randomFill set to true.
+-- Whether to use the seed to determine a fill percentage.
+local seedFill = true
+-- fill percentage between 0-100. Ignored if seedFill set to true.
 local fillPercentage = 15
 
 -- ####################
@@ -48,14 +48,13 @@ local calculationsPerUpdate = 0
 local startTime = os.time()
 -- set seed based on start time if enabled
 if randomSeed then
-    seed = startTime
+    seedToUse = startTime
 end
 -- randomly fill if enabled based on start time as seed
-if randomFill then
-    math.randomseed(seed)
+if seedFill then
+    math.randomseed(seedToUse)
     fillPercentage = math.random()*100
 end
-math.randomseed(seed)
 
 local secondsBetweenGenerations = 0
 if generationsPerSecond > 0 then
@@ -64,7 +63,7 @@ end
 
 function love.load()
     setWindowSize(cellsWide,cellsTall)
-    currentGrid = getNewGrid(cellsWide,cellsTall,fillPercentage)
+    currentGrid = getNewGrid(cellsWide,cellsTall,fillPercentage,seedToUse)
     secondsSinceLastGeneration = 0
     --[[-- glider
     currentGrid[4][3] = true
@@ -107,7 +106,7 @@ function love.update(dt)
     else
         updatesThisRound = math.min(calculationsPerUpdate, #cellsNeedingUpdate)
     end
-    for a = 1, updatesThisRound do
+    for _ = 1, updatesThisRound do
         local cellToCheck = table.remove(cellsNeedingUpdate, #cellsNeedingUpdate)
         local newState = getStateForCell(currentGrid, cellToCheck[1], cellToCheck[2])
         gridInProgress[cellToCheck[1]][cellToCheck[2]] = newState
@@ -120,19 +119,9 @@ function love.update(dt)
     end
 end
 
-
----Sets window size based on the grid size
-function setWindowSize(w, h)
-    ---get total width or height window should be based on number of cells given
-    function getDimensionSize(cellCount)
-        local dimensionSize = ((cellCount+1)*cellBorderSize)+(cellCount*cellSize)
-        return dimensionSize
-    end
-    local windowWidth, windowHeight = getDimensionSize(w), getDimensionSize(h)
-    love.window.setMode(windowWidth, windowHeight)
-end
----Returns a new grid table, and randomly fills based on percentage from 0-100
-function getNewGrid(w, h, percentFilled)
+---Returns a new grid table, and randomly fills based on percentage from 0-100. Optionally sets a given seed
+function getNewGrid(w, h, percentFilled, seed)
+    if seed then math.randomseed(seed) end
     local newGrid = {}
     for i = 1,w do
         local newRow = {}
@@ -186,7 +175,7 @@ end
 local function getNeighborCount(grid, x, y)
     local relativesToCheck = { {-1,-1}, {-1,0}, {-1,1}, {0,-1}, {0,1}, {1,-1}, {1,0}, {1,1} }
     local neighborCount = 0
-    for a, b in pairs(relativesToCheck) do
+    for _, b in pairs(relativesToCheck) do
         if grid[getRelInd(grid,x+b[1])][getRelInd(grid[x],y+b[2])] then
             neighborCount = neighborCount + 1
         end
@@ -197,7 +186,7 @@ end
 function getStateForCell(oldGrid, x, y)
     local neighbors = getNeighborCount(oldGrid,x,y)
     -- get current state of cell
-    local alive = nil
+    local alive
     if oldGrid[x][y] then
         alive = true
     else
@@ -208,8 +197,20 @@ function getStateForCell(oldGrid, x, y)
 end
 
 -- ##################
--- # DRAW FUNCTIONS #
+-- # LOVE FUNCTIONS #
 -- ##################
+---Sets window size based on the grid size
+function setWindowSize(w, h)
+    ---get total width or height window should be based on number of cells given
+    function getDimensionSize(cellCount)
+        local dimensionSize = ((cellCount+1)*cellBorderSize)+(cellCount*cellSize)
+        return dimensionSize
+    end
+    local windowWidth, windowHeight = getDimensionSize(w), getDimensionSize(h)
+    love.window.setMode(windowWidth, windowHeight, {
+        resizable = true,
+    })
+end
 ---Passed a grid, render the cells in it
 function drawCells(grid)
     for a, b in pairs(grid) do
@@ -225,7 +226,7 @@ function drawCells(grid)
         end
     end
 end
-
+---Draws borders
 function drawBorders()
     if cellBorderSize == 0 then return end
     -- center of top left pixel is 0.5, 0.5
@@ -245,10 +246,10 @@ function drawBorders()
     end
     local xCoords = getCoordinatesToDraw(cellsWide)
     local yCoords = getCoordinatesToDraw(cellsTall)
-    for k,v in pairs(xCoords) do
+    for _,v in pairs(xCoords) do
         love.graphics.line(v, 0.5, v, endLineHeight +0.5)
     end
-    for k,v in pairs(yCoords) do
+    for _,v in pairs(yCoords) do
         love.graphics.line(0.5, v, endLineWidth +0.5, v)
     end
 end
