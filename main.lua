@@ -4,53 +4,88 @@
 -- ##########
 -- # CONFIG #
 -- ##########
--- {red, green, blue, alpha}
+
+-- Color options. Alpha should be left at 1. {red, green, blue, alpha}
 local borderColor = {0.2, 0.2, 0.2, 1}
 local aliveColor = {0.8, 0.8, 0.8, 1}
 local deadColor = {0, 0, 0, 1}
+
+-- Border size. 0 disables borders
 local cellBorderSize = 1
+
+-- Cell size
 local cellSize = 10
+
+-- Board size
 local cellsWide = 120
 local cellsTall = 60
-local secondsBetweenGenerations = 0.2
+
+-- Update speed. If 0 or less, update as fast as possible
+local generationsPerSecond = 8
+
+-- Whether to use a new seed every time.
+local randomSeed = true
+-- seed should be a number (can be integer or float). Ignored if randomSeed set to true.
+local seed = 0
+
+-- Whether to use the seed to determine a random fill percentage.
+local randomFill = true
+-- fill percentage between 0-100. Ignored if randomFill set to true.
+local fillPercentage = 15
+
 -- ####################
 -- # ADVANCED OPTIONS #
 -- ####################
-local calculationsPerUpdate = -1  -- if less than 1, update whole board.
+
+-- Number of calculations to do per call to love.update(). If less than zero, all calculations will be done immediately.
+local calculationsPerUpdate = 0
+
 -- ##############
 -- # END CONFIG #
 -- ##############
 
+-- get start time in case it's used for the seed later
+local startTime = os.time()
+-- set seed based on start time if enabled
+if randomSeed then
+    seed = startTime
+end
+-- randomly fill if enabled based on start time as seed
+if randomFill then
+    math.randomseed(seed)
+    fillPercentage = math.random()*100
+end
+math.randomseed(seed)
+
+local secondsBetweenGenerations = 0
+if generationsPerSecond > 0 then
+    secondsBetweenGenerations = 1 / generationsPerSecond
+end
+
 function love.load()
-    math.randomseed(os.time())
     setWindowSize(cellsWide,cellsTall)
-    currentGrid = getNewGrid(cellsWide,cellsTall,10)
+    currentGrid = getNewGrid(cellsWide,cellsTall,fillPercentage)
     secondsSinceLastGeneration = 0
     --[[-- glider
     currentGrid[4][3] = true
     currentGrid[5][4] = true
     currentGrid[5][5] = true
     currentGrid[3][5] = true
-    currentGrid[4][5] = true
-    -- block
-    currentGrid[10][2] = true
-    currentGrid[11][2] = true
-    currentGrid[10][3] = true
-    currentGrid[11][3] = true
-    -- blinker
-    currentGrid[2][10] = true
-    currentGrid[3][10] = true
-    currentGrid[4][10] = true]]--
+    currentGrid[4][5] = true]]--
 end
 
 function love.draw()
     drawBorders()
     drawCells(currentGrid)
-    --[[love.graphics.setColor(0,0,0,.5)
-    love.graphics.rectangle("fill",10.5,10.5,100,30)
+    --[[
+    love.graphics.setColor(0.15,0.15,0.15,.8)
+    love.graphics.rectangle("fill",10.5,10.5,150,49)
     love.graphics.setColor(1,1,1,1)
     local winX, winY = love.graphics.getDimensions()
-    love.graphics.print(winX .. ", " .. winY,10.5,10.5)]]--
+    love.graphics.print("seed: " .. seed,13,13)
+    love.graphics.print("fill %: " .. math.floor(fillPercentage + 0.5),13,26)
+    --love.graphics.print("os.time() " .. os.time(),13,39)
+    ]]--
 end
 
 function love.update(dt)
@@ -100,7 +135,7 @@ end
 function getNewGrid(w, h, percentFilled)
     local newGrid = {}
     for i = 1,w do
-        newRow = {}
+        local newRow = {}
         for j = 1,h do
             if percentFilled >= math.random(1,100) then
                 newRow[j] = true
@@ -197,7 +232,8 @@ function drawBorders()
     love.graphics.setColor(borderColor)
     love.graphics.setLineWidth(cellBorderSize)
     local centerOfLine = cellBorderSize*0.5
-    local windowWidth, windowHeight = love.graphics.getDimensions()
+    local endLineWidth = ((cellBorderSize+cellSize)*cellsWide)+centerOfLine
+    local endLineHeight = ((cellBorderSize+cellSize)*cellsTall)+centerOfLine
     ---Given a cell count along a dimension, get each border coordinate
     function getCoordinatesToDraw(cellCount)
         local coordinates = {}
@@ -210,9 +246,9 @@ function drawBorders()
     local xCoords = getCoordinatesToDraw(cellsWide)
     local yCoords = getCoordinatesToDraw(cellsTall)
     for k,v in pairs(xCoords) do
-        love.graphics.line(v, 0.5, v, windowHeight+0.5)
+        love.graphics.line(v, 0.5, v, endLineHeight +0.5)
     end
     for k,v in pairs(yCoords) do
-        love.graphics.line(0.5, v, windowWidth+0.5, v)
+        love.graphics.line(0.5, v, endLineWidth +0.5, v)
     end
 end
