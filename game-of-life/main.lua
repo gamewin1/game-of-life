@@ -44,8 +44,15 @@ local calculationsPerUpdate = 0
 -- # END CONFIG #
 -- ##############
 
+-- If running ComputerCraft, create the love table so further functions can exist.
+local startTime
+if _CC_DEFAULT_SETTINGS then
+    startTime = os.epoch()
+    love = {}
+else
+    startTime = os.time()
+end
 -- get start time in case it's used for the seed later
-local startTime = os.time()
 -- set seed based on start time if enabled
 if randomSeed then
     seedToUse = startTime
@@ -59,10 +66,6 @@ end
 local secondsBetweenGenerations = 0
 if generationsPerSecond > 0 then
     secondsBetweenGenerations = 1 / generationsPerSecond
-end
--- If running ComputerCraft, create the love table so further functions can exist.
-if _CC_DEFAULT_SETTINGS then
-    love = {}
 end
 
 function love.load()
@@ -262,12 +265,6 @@ end
 -- # COMPUTERCRAFT FUNCTIONS #
 -- ###########################
 
-function ccLoad()
-    math.randomseed(os.epoch())
-    currentGrid = getNewGrid(cellsWide,cellsTall,10)
-    secondsSinceLastGeneration = 0
-end
-
 ---Passed a grid, render the cells in it
 function ccDraw(grid)
     for x, b in pairs(grid) do
@@ -282,28 +279,25 @@ function ccDraw(grid)
     end
 end
 
----This is main loop if run in computercraft
-function computercraft()
-    local dt = os.clock() - timeOfLastUpdate
-    timeOfLastUpdate = timeOfLastUpdate + dt
-    love.update(dt)
-    ccDraw(currentGrid)
-end
-
--- run the computercraft version if we find this
+-- run the ComputerCraft version if we find a CC specific variable
 if _CC_DEFAULT_SETTINGS then
-    blankLine = ""
     cellsWide, cellsTall = term.getSize()
+    --[[blankLine = ""
     for i = 1,cellsWide do
         blankLine = blankLine .. " "
     end
     term.setPaletteColor(colors.black,deadColor[1],deadColor[2],deadColor[3])
-    term.setPaletteColor(colors.white,aliveColor[1],aliveColor[2],aliveColor[3])
-    ccLoad()
+    term.setPaletteColor(colors.white,aliveColor[1],aliveColor[2],aliveColor[3])]]--
+    currentGrid = getNewGrid(cellsWide,cellsTall,fillPercentage,seedToUse)
+    secondsSinceLastGeneration = 0
     timeOfLastUpdate = os.clock()
+    -- main loop
     while true do
-        computercraft()
-        -- yields
+        local dt = os.clock() - timeOfLastUpdate
+        timeOfLastUpdate = timeOfLastUpdate + dt
+        love.update(dt)
+        ccDraw(currentGrid)
+        -- yields to prevent crashing
         os.queueEvent("fakeEvent");
         os.pullEvent("fakeEvent");
     end
