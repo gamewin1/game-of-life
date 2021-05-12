@@ -297,8 +297,13 @@ if _CC_DEFAULT_SETTINGS then
         timeOfLastUpdate = timeOfLastUpdate + dt
         love.update(dt)
         ccDraw(currentGrid)
-        -- yields to prevent crashing
-        os.queueEvent("fakeEvent");
-        os.pullEvent("fakeEvent");
+        -- queue an event and yield to prevent crashing
+        os.queueEvent("fakeEvent")
+        local eventData = {os.pullEvent()}
+        if eventData[1] == "char" then
+            if eventData[2] == "q" then
+                break
+            end
+        end
     end
 end
