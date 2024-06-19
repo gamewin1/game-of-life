@@ -1,3 +1,5 @@
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fjessedufrene%2Fgame-of-life.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fjessedufrene%2Fgame-of-life?ref=badge_shield)
+
 John Conway's Game of Life
 ==========================
 
@@ -21,3 +23,6 @@ There are a few ways to run in Love2D:
 
 The `.love` file can either be retrieved from the Releases page, or it can be made by zipping all files inside the
 `game-of-life` subfolder (do not zip the subfolder itself) to a `.zip`, then renaming the extension to be `.love`.
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fjessedufrene%2Fgame-of-life.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fjessedufrene%2Fgame-of-life?ref=badge_large)
